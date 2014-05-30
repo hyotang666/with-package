@@ -1,13 +1,12 @@
 (in-package :with-package)
 
-(defun dlist-p(arg)
+(defun pairp(arg)
   "This is helper function for mapleaf.
-  dlist-p arg => boolean
+  pairp arg => boolean
   ARG is any lisp expression.
-  Return True if ARG is dot-list.
+  Return True if ARG is just one cons and its CDR is not NIL.
   Otherwise nil."
   (and(consp arg)
-    (atom(car arg))
     (atom(cdr arg))
     (not(null(cdr arg)))))
 
@@ -19,7 +18,7 @@
   (cond
     ((null tree) nil)
     ((atom tree)(funcall fn tree))
-    ((dlist-p tree)(cons(funcall fn (car tree))
+    ((pairp tree)(cons(funcall fn (car tree))
 		        (funcall fn (cdr tree))))
     (t (cons(mapleaf fn (car tree))
 	    (mapleaf fn (cdr tree))))))

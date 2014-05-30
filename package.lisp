@@ -3,4 +3,5 @@
 (defpackage :with-package
   (:use :cl)
   (:export #:with-import
-	   #:with-use-package))
+	   #:with-use-package
+	   #:safety-use-package))
