@@ -30,14 +30,14 @@
   Returns last S-Expression's retrun value.(Work as implicit PROGN)
 
   WITH-IMPORT allows you to use external package's symbol (e.g.
-  special-symbols functions methods macros) without prefix.
+  special-symbols, functions, methods, macros) without prefix locally.
   If current package have same name with one of COMMANDS,
   it will be shadowed.
   e.g. Let's say there is CL-USER::FOO and BAR::FOO.
   If you import BAR::FOO, inside scope of WITH-IMPORT 
   you never acsess to CL-USER::FOO, even if you wrote \"cl-user::foo\".
   It will be reason of complex and search hard bugs.
-  But if you does not forget to be careful, 
+  But if you did not forget to be careful, 
   this will be great help for your cord writing.
   After through out from WITH-IMPORT's scope,
   you will be able to access CL-USER::FOO again."
@@ -58,8 +58,8 @@
   If current package have same name with one of PACKAGE's external symbols,
   it will be shadowed.
   e.g. Let's say there is CL-USER::FOO and BAR::FOO.
-  If you used package BAR, inside scope of WITH-USE-PACKAGE, 
-  you never acsess to CL-USER::FOO, even if you wrote \"cl-user::foo\".
+  If you used package BAR inside scope of WITH-USE-PACKAGE, 
+  you never accsess to CL-USER::FOO, even if you wrote \"cl-user::foo\".
   It will be reason of complex and search hard bugs.
   But if you does not forget to be careful, 
   this will be great help for your cord writing.
@@ -71,8 +71,8 @@
 		      collect (string symbol))
 		body))))
 
-(defun safety-use-package (package)
-  "safety-use-package package => side-effect!
+(defun dangerous-use-package (package)
+  "dangerous-use-package package => side-effect!
 
   PACKAGE is keyword symbol represents external package name.
 
@@ -80,12 +80,38 @@
   Otherwise imported.
 
   Returns 2 values.
-  First is fixnum represents how many symbol is imported.
-  Second is generalized boolean.
+  First is generalized boolean.
   When some symbol is ignored, returns such symbols list.
-  If second value is NIL, 
+  Second is fixnum represents how many symbol is imported.
+  If first value is NIL, 
   it means all external symbol of PACKAGE is imported successfully." 
   (loop for symbol being each external-symbol in package
-	if (find-symbol(string symbol)) collect symbol into result
+	if (find-symbol(string symbol)) collect it into ignored
 	else count symbol into import and do (import symbol) 
-	finally (return (values import result))))
+	finally (return (values ignored import))))
+
+(defun most-dangerous-use-package (package)
+  "most-dangerous-use-package package => side-effect!
+
+  PACKAGE is keyword symbol represents external package name.
+
+  If name conflicts occured, that symbol is shadowing-imported.
+
+  Returns generalized boolean.
+  When some symbol is shadowed, returns such symbols list.
+  If return value is NIL, 
+  it means all external symbol of PACKAGE is imported successfully." 
+  (loop for symbol being each external-symbol in package
+	if (find-symbol(string symbol)) collect it into shadowed
+	else do (shadowing-import symbol) 
+	finally (return shadowed)))
+
+(defun find-conflict(package)
+  "find-conflict package => list
+
+  PACKAGE is keyword symbol represents external package name.
+
+  If name is conflicted, collect such names then return it.
+  Otherwise nil."
+  (loop for symbol being each external-symbol in package
+	if (find-symbol(string symbol))collect it))
