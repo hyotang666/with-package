@@ -81,7 +81,8 @@
 				       result
 				       (mapcar #'string (if(listp except)
 							  except
-							  (list except))))))
+							  (list except)))
+				       :test #'string=)))
 		body))))
 
 (defun dangerous-use-package (package)
