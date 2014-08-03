@@ -4,4 +4,6 @@
   (:use :cl)
   (:export #:with-import
 	   #:with-use-package
-	   #:safety-use-package))
+	   #:dangerous-use-package
+	   #:most-dangerous-use-package
+	   #:find-conflict))

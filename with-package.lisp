@@ -12,7 +12,7 @@
   be interned in *PACKAGE*."
   (mapleaf(lambda(leaf)
 	    (cond
-	      ((symbolp leaf)
+	      ((and(not(keywordp leaf))(symbolp leaf))
 	       (if(member(ignore-errors(string leaf))
 		    fn-list :test #'string=)
 		 (intern(string leaf)*package*)
@@ -41,10 +41,14 @@
   this will be great help for your cord writing.
   After through out from WITH-IMPORT's scope,
   you will be able to access CL-USER::FOO again."
-  (let((*package*(find-package package)))
+  (let((*package*(let((temp(find-package package)))
+		   (if temp
+		     temp
+		     (error "WITH-PACKAGE:with-import signaled~&~
+			    Can not find package ~S."package)))))
     `(progn ,@(treatment (mapcar #'string commands) body))))
 
-(defmacro with-use-package((package)&body body)
+(defmacro with-use-package((package &key (except nil))&body body)
   "with-use-package (package) &body body
   
   PACKAGE is keyword symbol represents external package.
@@ -65,10 +69,19 @@
   this will be great help for your cord writing.
   After through out from WITH-USE-PACKAGE's scope,
   you will be able to access CL-USER::FOO again."
-  (let((*package*(find-package package)))
+  (let((*package*(let((temp(find-package package)))
+		   (if temp
+		     temp
+		     (error "WITH-PACKAGE:with-use-package signaled!~&~
+			    Can not find package ~S"package)))))
     `(progn ,@(treatment 
-		(loop for symbol being each external-symbols of package
-		      collect (string symbol))
+		(loop for symbol being each external-symbol of package
+		      collect (string symbol)into result
+		      finally (return(set-exclusive-or 
+				       result
+				       (mapcar #'string (if(listp except)
+							  except
+							  (list except))))))
 		body))))
 
 (defun dangerous-use-package (package)
@@ -114,4 +127,6 @@
   If name is conflicted, collect such names then return it.
   Otherwise nil."
   (loop for symbol being each external-symbol in package
-	if (find-symbol(string symbol))collect it))
+	if (find-symbol(string symbol))
+	collect(let((sym(intern(string symbol))))
+		 (cons sym (symbol-package sym)))))
