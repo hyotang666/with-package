@@ -12,7 +12,7 @@
   be interned in *PACKAGE*."
   (mapleaf(lambda(leaf)
 	    (cond
-	      ((and(not(keywordp leaf))(symbolp leaf))
+	      ((and(not(keywordp leaf))(symbolp leaf)(symbol-package leaf))
 	       (if(member(ignore-errors(string leaf))
 		    fn-list :test #'string=)
 		 (intern(string leaf)*package*)
