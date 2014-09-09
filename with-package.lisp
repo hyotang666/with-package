@@ -48,7 +48,7 @@
 			    Can not find package ~S."package)))))
     `(progn ,@(treatment (mapcar #'string commands) body))))
 
-(defmacro with-use-package((package &key (except nil))&body body)
+(defmacro with-use-package((package &key(except nil)(with-internal nil))&body body)
   "with-use-package (package) &body body
   
   PACKAGE is keyword symbol represents external package.
@@ -77,12 +77,16 @@
     `(progn ,@(treatment 
 		(loop for symbol being each external-symbol of package
 		      collect (string symbol)into result
-		      finally (return(set-exclusive-or 
-				       result
-				       (mapcar #'string (if(listp except)
-							  except
-							  (list except)))
-				       :test #'string=)))
+		      finally (return(nconc
+		                       (set-exclusive-or 
+					 result
+				 	 (mapcar #'string (if(listp except)
+							   except
+							   (list except)))
+					 :test #'string=)
+				       (if(listp with-internal)
+					 with-internal
+					 (list with-internal)))))
 		body))))
 
 (defun dangerous-use-package (package)
