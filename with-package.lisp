@@ -86,7 +86,7 @@
 					 :test #'string=)
 				       (mapcar #'string (if(listp with-internal)
 							  with-internal
-							  (list with-internal)))
+							  (list with-internal))))))
 		body))))
 
 (defun dangerous-use-package (package)
