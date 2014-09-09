@@ -117,7 +117,7 @@
   it means all external symbol of PACKAGE is imported successfully." 
   (loop for symbol being each external-symbol in package
 	if (find-symbol(string symbol)) collect it into shadowed
-	else do (shadowing-import symbol) 
+	do (shadowing-import symbol) 
 	finally (return shadowed)))
 
 (defun find-conflict(package)
