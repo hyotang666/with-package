@@ -84,9 +84,9 @@
 							   except
 							   (list except)))
 					 :test #'string=)
-				       (if(listp with-internal)
-					 with-internal
-					 (list with-internal)))))
+				       (mapcar #'string (if(listp with-internal)
+							  with-internal
+							  (list with-internal)))
 		body))))
 
 (defun dangerous-use-package (package)
