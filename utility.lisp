@@ -12,7 +12,7 @@
     (atom(cdr arg))
     (not(null(cdr arg)))))
 
-(defun mapleaf (fn tree);depend-on DLIST-P
+(defun mapleaf (fn tree);depend-on PAIRP
   "mapleaf fn tree => tree
 
   FN is function to be called for each leaf of TREE.
