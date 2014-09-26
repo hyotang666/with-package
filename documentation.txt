@@ -57,8 +57,8 @@ with-import (package &rest symbols)&body body => result
 PACKAGE is keyword symbol represents external package.
 Rest parameter SYMBOLS is also keyword symbols represents symbols in PACKAGE to be used.
 WITH-IMPORT is useful when some symbols conflicts with current package's symbols, but your interests few symbols.
-In fact, WITH-IMPORT is recommended rather than using WITH-USE-PACKAGE, because WITH-IMPORT can be meta-data for your cord too.
-After writing the cord, in the maintainace phase, it is very helpful to be able to recognize where the symbol came from.
+In fact, WITH-IMPORT is recommended rather than using WITH-USE-PACKAGE, because WITH-IMPORT can be meta-data for your code too.
+After writing the code, in the maintainace phase, it is very helpful to be able to recognize where the symbol came from.
 Additionaly, WITH-IMPORT is safer than WITH-USE-PACKAGE.
 For detail, see next chapter.
 
@@ -92,11 +92,11 @@ Basic approach is below.
 
 Yes, very simple.
 But problem is not so simple.
-This cord signaled an error.
+This code signaled an error.
 Because lisp do REPL.
 At first lisp do READ, and all symbols are interned in current package in this time.
 Let's say current package is EXAMPLE, and EXAMPLE uses COMMON-LISP package.
-The cord above is, in fact ...
+The code above is, in fact ...
 
 (example::let((example::*package*(example::find-package keyword:alexandria)))
  (example::iota 3))
@@ -116,7 +116,7 @@ When met symbol, lisp check the BLACK-LIST.
 If symbol is found in BLACK-LIST, it will be interned in current package.(of course now current package is binded by new package to use)
 Else do nothing, traversing will go on.
 
-So cord above becomes below
+So code above becomes below
 
 (example::let((example::*package*(example::find-package keyword:alexandria)))
  (alexandria::iota 3))
@@ -137,7 +137,7 @@ Others are very buggy.
 
 Similar with FLET, WITH-PACKAGE has very strong shadowing.
 
-Let's say here is the cord below
+Let's say here is the code below
 
 (flet((car(arg)
         "Which do you like cl:car or me?"
@@ -165,7 +165,7 @@ Like that, WITH-PACKAGE do similar behavior.
 SBCL has function STRING-TO-OCTETS.
 Library BABEL and FLEXI-STREAMS has same name function too.
 
-If you eval cord below in sbcl...
+If you eval code below in sbcl...
 
 (with-package:with-use-package(:babel)
   (with-package:with-use-package(:flexi-streams)
@@ -207,7 +207,7 @@ To avoid this, you need to let command be inside of backquote.
 
 :Name separation occurs against parameter.
 
-Example cord below signaled an error.
+Example code below signaled an error.
 
 (defun foo (png)
   (with-package:with-use-package(:zpng)
@@ -216,7 +216,7 @@ Example cord below signaled an error.
     (finish-png png)))
 
 Because package ZPNG export symbol PNG as class name.
-So cord above is equivalant with below.
+So code above is equivalant with below.
 
 (example::defun example::foo (example::png)
   (zpng:start-png zpng:png)
@@ -242,7 +242,7 @@ To avoid this, you have 3 ways.
     (write-png png)
     (finish-png png)))
 
-Above cord becomes
+Above code becomes
 
 (example::defun example::foo (zpng:png)
   (zpng:start-png zpng:png)
