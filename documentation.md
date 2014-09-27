@@ -1,6 +1,8 @@
 WITH-PACKAGE - Common Lisp utility library for using external package locally.
+==============
 
-;;; Abstraction
+Abstraction
+--------------
 
 WITH-PACKAGE is a propose of one way to decrease possibility of occurring name confliction.
 Please note WITH-PACKAGE never solve the name conflict problems, but just decrease it with few restrictions.
@@ -9,26 +11,27 @@ Of course current package's namespace is never polluted.
 
 Additionally, WITH-PACKAGE provides some useful API.
 
-;;; Quick start, or for person who doesn't have enough time.
+Quick start, or for person who doesn't have enough time.
+--------------
 
 Look examples below.
 No need to learn about special knowledge.
 
-EXAMPLE[1]> (ql:quickload :alexandria)
-To load "alexandria":
-  Load 1 ASDF system:
-    alexandria
-; Loading "alexandria"
-
-(:ALEXANDRIA)
-EXAMPLE[2]> (iota 3)
-
-*** - EVAL: undefined function IOTA
-EXAMPLE[3]> (with-package:with-use-package(:alexandria)(iota 3))
-(0 1 2)
-EXAMPLE[4]> (iota 3)
-
-*** - EVAL: undefined function IOTA
+    EXAMPLE[1]> (ql:quickload :alexandria)
+    To load "alexandria":
+      Load 1 ASDF system:
+        alexandria
+    ; Loading "alexandria"
+    
+    (:ALEXANDRIA)
+    EXAMPLE[2]> (iota 3)
+    
+    *** - EVAL: undefined function IOTA
+    EXAMPLE[3]> (with-package:with-use-package(:alexandria)(iota 3))
+    (0 1 2)
+    EXAMPLE[4]> (iota 3)
+    
+    *** - EVAL: undefined function IOTA
 
 What you should know is ...
 1:Command name is WITH-USE-PACKAGE.
@@ -39,7 +42,8 @@ That's all.
 
 When you met a problem, see chapters below.
 
-;;; API or for person who has enough time.
+API or for person who has enough time.
+--------------
 
 [macro]
 with-use-package (package &key :except :with-internal)&body body => result
@@ -83,12 +87,15 @@ PACKAGE is keyword symbol represents external package.
 MOST-DANGEROUS-USE-PACKAGE tries to use PAKCAGE, then if name confliction is occured with current package, such symbols are SHADOWING-IMPORTed.
 This is useful when you are in develop phase, and you know name confliction will be occured, and you want to ignore such current package's symbols.
 
-;;; Rationale. Or for person who want to gaze into deep lisp darkness...
+Rationale. Or for person who want to gaze into deep lisp darkness...
+--------------
 
 Basic approach is below.
 
+```Common LispCommon Lisp
 (let((*package*(find-package :alexandria)))
   (iota 3))
+```
 
 Yes, very simple.
 But problem is not so simple.
@@ -98,8 +105,10 @@ At first lisp do READ, and all symbols are interned in current package in this t
 Let's say current package is EXAMPLE, and EXAMPLE uses COMMON-LISP package.
 The code above is, in fact ...
 
+```Common LispCommon Lisp
 (example::let((example::*package*(example::find-package keyword:alexandria)))
  (example::iota 3))
+```
 
 after READ.
 In the EVAL time, at first, LET binds *package* to alexandria package dynamically.
@@ -118,8 +127,10 @@ Else do nothing, traversing will go on.
 
 So code above becomes below
 
+```Common LispCommon Lisp
 (example::let((example::*package*(example::find-package keyword:alexandria)))
  (alexandria::iota 3))
+```
 
 after macro expansion.
 
@@ -139,39 +150,45 @@ Similar with FLET, WITH-PACKAGE has very strong shadowing.
 
 Let's say here is the code below
 
+```Common LispCommon Lisp
 (flet((car(arg)
         "Which do you like cl:car or me?"
         (declare(ignore arg))
         (princ "You chose me! I love you!")))
   (cl:car '(a b c)))
+```
 
 You chose cl:car explicitly, but flet:car never cares.
 
+```
 => You chose me! I love you!
 "You chose me! I love you!"
+```
 
 It may depends on implementation, but atleast GNU CLISP and CCL do this behavior.
 
 Like that, WITH-PACKAGE do similar behavior.
 
-(defun iota(arg)
-  (declare(ignore arg))
-  (princ "I am iota."))
-
-(with-package:with-use-package(:alexandria)
-  (example::iota 3))
-=> (0 1 2)
+    (defun iota(arg)
+      (declare(ignore arg))
+      (princ "I am iota."))
+    
+    (with-package:with-use-package(:alexandria)
+      (example::iota 3))
+    => (0 1 2)
 
 SBCL has function STRING-TO-OCTETS.
 Library BABEL and FLEXI-STREAMS has same name function too.
 
 If you eval code below in sbcl...
 
+```Common Lisp
 (with-package:with-use-package(:babel)
   (with-package:with-use-package(:flexi-streams)
     (babel:string-to-octets "foo")
     (sb-ext:string-to-octets "bar")
     (string-to-octets "bazz")))
+```
 
 FLEXI-STREAMS'S STRING-TO-OCTETS shall be called three times.
 
@@ -180,54 +197,60 @@ FLEXI-STREAMS'S STRING-TO-OCTETS shall be called three times.
 If you want to use WITH-PACKAGE inside DEFMACRO, you need to be more carefully.
 Because WITH-PACKAGE never cares helper command's return value.
 
-(defun helper(num)
-  `(iota ,num))
-
-(defmacro foo(num)
-  (with-package:with-use-pacage(:alexandria)
-    `(,@(helper num))))
-
-(foo 3)
-*** - EVAL: undefined function IOTA
+    (defun helper(num)
+      `(iota ,num))
+    
+    (defmacro foo(num)
+      (with-package:with-use-pacage(:alexandria)
+        `(,@(helper num))))
+    
+    (foo 3)
+    *** - EVAL: undefined function IOTA
 
 Because WITH-PACKAGE cares only its parameter body.
 
 Macro call (foo 3) becomes...
 
-(example::iota 3)
+    (example::iota 3)
 
 To avoid this, you need to let command be inside of backquote.
 
-(defmacro foo(num)
-  `(with-package:with-use-package(:alexandria)
-     (,@(helper num))))
-
-(foo 3)
-=>(0 1 2)
+    (defmacro foo(num)
+      `(with-package:with-use-package(:alexandria)
+         (,@(helper num))))
+    
+    (foo 3)
+    =>(0 1 2)
 
 :Name separation occurs against parameter.
 
 Example code below signaled an error.
 
+```Common Lisp
 (defun foo (png)
   (with-package:with-use-package(:zpng)
     (start-png png)
     (write-png png)
     (finish-png png)))
+```
 
 Because package ZPNG export symbol PNG as class name.
 So code above is equivalant with below.
 
+```Common Lisp
 (example::defun example::foo (example::png)
   (zpng:start-png zpng:png)
   (zpng:write-png zpng:png)
   (zpng:finish-png zpng:png))
+```
 
 Unfortunately, definition is valid (although it depends on implementation. SBCL will signal style warning.).
 Error is signaled in run time.
 
+```Common Lisp
 (foo 3)
 *** - FOO: variable ZPNG:PNG has no value
+```
 
 If symbol ZPNG:PNG has its own value, it is worst situation.
 Even if it is run time, error may not signaled, but FOO's return value is not your expect because ZPNG:PNG value is used instead of parameter.
@@ -236,42 +259,51 @@ To avoid this, you have 3 ways.
 
 1:Let command be outside of DEFUN.
 
+```Common Lisp
 (with-package:with-use-package(:zpng)
   (defun foo (png)
     (start-png png)
     (write-png png)
     (finish-png png)))
+```
 
 Above code becomes
 
+```Common Lisp
 (example::defun example::foo (zpng:png)
   (zpng:start-png zpng:png)
   (zpng:write-png zpng:png)
   (zpng:finish-png zpng:png)))
+```
 
 after macro expansion.
 Name separation does not occur.
 
 2:Use :EXCEPT key word parameter.
 
+```Common Lisp
 (defun foo(png)
   (with-package:with-use-package(:zpng :except (:png))
     (start-png png)
     (write-png png)
     (finish-png png)))
+```
 
 3:Use WITH-IMPORT alternatively.
 
 If your interests symbol is few, WITH-IMPORT is better.
 In this example, ZPNG:PNG is not your interest symbol.
 
+```Common Lisp
 (defun foo(png)
   (with-package:with-import(:zpng :start-png :write-png :finish-png))
     (start-png png)
     (write-png png)
     (finish-png png)))
+```
 
-;;; appendix
+appendix
+--------------
 
 Do you feel WITH-PACKAGE has too many restrictions?
 Probably you are right.

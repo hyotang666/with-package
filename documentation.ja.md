@@ -1,6 +1,8 @@
 WITH-PACKAGE - 外部パッケージを局所的に使用するためのCommon Lispユーティリティライブラリ。
+================
 
-;;;　Abstraction
+Abstraction
+----------------
 
 WITH-PACKAGEは名前衝突が起こる可能性を軽減させる一つの提案です。
 WITH-PACKAGEはけして名前衝突問題を解決するものではない点、要注意して欲しい。
@@ -10,26 +12,27 @@ WITH-PACKAGEを使うことで外部パッケージを局所的に使うこと�
 
 さらにWITH-PACKAGEはいくつかの便利なAPIを提供する。
 
-;;; クイックスタート、もしくは充分な時間の無い方のために。
+クイックスタート、もしくは充分な時間の無い方のために。
+----------------
 
 以下の例を見て欲しい。
 特別な知識を学ぶ必要性はなにもない。
 
-EXAMPLE[1]> (ql:quickload :alexandria)
-To load "alexandria":
-  Load 1 ASDF system:
-    alexandria
-; Loading "alexandria"
-
-(:ALEXANDRIA)
-EXAMPLE[2]> (iota 3)
-
-*** - EVAL: undefined function IOTA
-EXAMPLE[3]> (with-package:with-use-package(:alexandria)(iota 3))
-(0 1 2)
-EXAMPLE[4]> (iota 3)
-
-*** - EVAL: undefined function IOTA
+    EXAMPLE[1]> (ql:quickload :alexandria)
+    To load "alexandria":
+      Load 1 ASDF system:
+        alexandria
+    ; Loading "alexandria"
+    
+    (:ALEXANDRIA)
+    EXAMPLE[2]> (iota 3)
+    
+    *** - EVAL: undefined function IOTA
+    EXAMPLE[3]> (with-package:with-use-package(:alexandria)(iota 3))
+    (0 1 2)
+    EXAMPLE[4]> (iota 3)
+    
+    *** - EVAL: undefined function IOTA
 
 知っておくべきことは以下の通り。
 １：コマンド名はWITH-USE-PACKAGEである。
@@ -40,7 +43,8 @@ EXAMPLE[4]> (iota 3)
 
 何か問題にぶつかったら、その時は以下の章に目を通してみてほしい。
 
-;;;　API、もしくは充分な時間のある方のために。
+API、もしくは充分な時間のある方のために。
+----------------
 
 [macro]
 with-use-package (package &key :except :with-internal)&body body => result
@@ -84,12 +88,15 @@ PACKAGEはキーワードシンボルで、外部パッケージを指す。
 MOST-DANGEROUS-USE-PACKAGEはPACKAGEをUSEしようとし、もしカレントパッケージと名前衝突が起こるようなら、そのようなシンボルをSHADOWING-IMPORTする。
 これは開発段階において、名前衝突が起きることを既に承知しており、そのようなカレントパッケージのシンボルを無視してしまいたいときに便利です。
 
-;;; 論理的根拠、もしくはLispの深淵を覗き込みたい方のために。
+論理的根拠、もしくはLispの深淵を覗き込みたい方のために。
+----------------
 
 基本的な攻略法は以下の通り。
 
+```Common Lisp
 (let((*package*(find-package :alexandria)))
   (iota 3))
+```
 
 非常にシンプルです。
 でも問題はそんなにシンプルじゃない。
@@ -99,8 +106,10 @@ MOST-DANGEROUS-USE-PACKAGEはPACKAGEをUSEしようとし、もしカレント�
 カレントパッケージがEXAMPLEだとして、EXAMPLEはCOMMON-LISPパッケージをUSEしているものとしよう。
 とすると上記のコードは実は以下のようなものであるといえる。
 
+```Common Lisp
 (example::let((example::*package*(example::find-package keyword:alexandria)))
  (example::iota 3))
+```
 
 EVAL時に、Lispはまず最初にカレントパッケージをalexandriaパッケージに動的に束縛する。
 そしてexample::iota関数を呼び出そうとする。
@@ -118,8 +127,10 @@ WITH-PACKAGEを使うと、Lispはカレントパッケージを、使うべき�
 
 ゆえに上記のコードはマクロ展開後以下のようになる。
 
+```Common Lisp
 (example::let((example::*package*(example::find-package keyword:alexandria)))
  (alexandria::iota 3))
+```
 
 このアルゴリズムはいくつかの制約を引き換えとする。
 
@@ -137,39 +148,43 @@ FLETと似ていて、WITH-PACKAGEはとても強いシャドウイングを行�
 
 以下のようなコードがあるとしよう。
 
+```Common Lisp
 (flet((car(arg)
         "Which do you like cl:car or me?"
         (declare(ignore arg))
         (princ "You chose me! I love you!")))
   (cl:car '(a b c)))
+```
 
 CL:CARを明示的に呼び出しているのに、FLETはお構い無しです。
 
-=> You chose me! I love you!
-"You chose me! I love you!"
+    => You chose me! I love you!
+    "You chose me! I love you!"
 
 処理系にも依存するけど、少なくともGNU CLISPとCCLはこの振る舞いをする。
 
 同様の振る舞いをWITH-PACKAGEも行う。
 
-(defun iota(arg)
-  (declare(ignore arg))
-  (princ "I am iota."))
-
-(with-package:with-use-package(:alexandria)
-  (example::iota 3))
-=> (0 1 2)
+    (defun iota(arg)
+      (declare(ignore arg))
+      (princ "I am iota."))
+    
+    (with-package:with-use-package(:alexandria)
+      (example::iota 3))
+    => (0 1 2)
 
 SBCLにはSTRING-TO-OCTETSという関数がある。
 BABELやFLEXI-STREAMSといったライブラリにも同名の関数がある。
 
 もし以下のコードをSBCLで評価したなら、、、
 
+```Common Lisp
 (with-package:with-use-package(:babel)
   (with-package:with-use-package(:flexi-streams)
     (babel:string-to-octets "foo")
     (sb-ext:string-to-octets "bar")
     (string-to-octets "bazz")))
+```
 
 FLEXI-STREAMSのSTRING-TO-OCTETSが３回呼び出されることとなる。
 
@@ -178,15 +193,15 @@ FLEXI-STREAMSのSTRING-TO-OCTETSが３回呼び出されることとなる。
 もしWITH-PACKAGEをDEFMACRO内で使いたいなら、さらに気をつけなくてはならない。
 というのもWITH-PACKAGEはヘルパーコマンドの返り値には関与しないからです。
 
-(defun helper(num)
-  `(iota ,num))
-
-(defmacro foo(num)
-  (with-package:with-use-pacage(:alexandria)
-    `(,@(helper num))))
-
-(foo 3)
-*** - EVAL: undefined function IOTA
+    (defun helper(num)
+      `(iota ,num))
+    
+    (defmacro foo(num)
+      (with-package:with-use-pacage(:alexandria)
+        `(,@(helper num))))
+    
+    (foo 3)
+    *** - EVAL: undefined function IOTA
 
 WITH-PACKAGEが関与するのは引数として受け取ったBODYのみです。
 
@@ -196,36 +211,42 @@ WITH-PACKAGEが関与するのは引数として受け取ったBODYのみです�
 
 これを避けるためにはコマンドをバッククォートの中に入れてしまう必要がある。
 
-(defmacro foo(num)
-  `(with-package:with-use-package(:alexandria)
-     (,@(helper num))))
-
-(foo 3)
-=>(0 1 2)
+    (defmacro foo(num)
+      `(with-package:with-use-package(:alexandria)
+         (,@(helper num))))
+    
+    (foo 3)
+    =>(0 1 2)
 
 ; 引数に対し名前分割が起きる。
 
 以下のサンプルコードはエラーを発する。
 
+```Common Lisp
 (defun foo (png)
   (with-package:with-use-package(:zpng)
     (start-png png)
     (write-png png)
     (finish-png png)))
+```
 
 というのもパッケージZPNGはクラス名としてシンボルPNGをエクスポートしているからです。
 ゆえに、上記のコードは以下のものと等価です
 
+```Common Lisp
 (example::defun example::foo (example::png)
   (zpng:start-png zpng:png)
   (zpng:write-png zpng:png)
   (zpng:finish-png zpng:png))
+```
 
 不幸にも、この定義は合法となる（もっとも処理系に依存するのだけれど。sbclならスタイルウォーニングを発するだろう）
 エラーは実行時に発せられる。
 
+```
 (foo 3)
 *** - FOO: variable ZPNG:PNG has no value
+```
 
 もしシンボルZPNG:PNGが値を持っていたなら最悪だ。
 実行時でもエラーは発せられないかもしれず、それでいてfooの返り値は、引数の変わりにZPNG:PNGの値が使われるため期待とことなるものとなってしまう。
@@ -234,35 +255,42 @@ WITH-PACKAGEが関与するのは引数として受け取ったBODYのみです�
 
 １：コマンドをDEFUNの外側に出す。
 
+```Common Lisp
 (with-package:with-use-package(:zpng)
   (defun foo (png)
     (start-png png)
     (write-png png)
     (finish-png png)))
+```
 
 上記のコードは以下コードに展開される。
 
+```Common Lisp
 (example::defun example::foo (zpng:png)
   (zpng:start-png zpng:png)
   (zpng:write-png zpng:png)
   (zpng:finish-png zpng:png)))
+```
 
 名前分割は起きない。
 
 ２：:EXCEPTキーワード引数を使う。
 
+```Common Lisp
 (defun foo(png)
   (with-package:with-use-package(:zpng :except (:png))
     (start-png png)
     (write-png png)
     (finish-png png)))
+```
 
 ３：WITH-IMPORTを代わりに使う。
 
 使いたいシンボルが極少数ならWITH-IMPORTのほうがベターです。
 この例に於いて、ZPNG:PNGはべつに興味深いシンボルではないはずです。
 
-;;;　最後に。
+最後に。
+----------------
 
 WITH-PACKAGEには制約が多すぎると感じられたんじゃないでしょうか？
 たぶんそれは正しい。
