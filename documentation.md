@@ -34,10 +34,12 @@ No need to learn about special knowledge.
     *** - EVAL: undefined function IOTA
 
 What you should know is ...
-1:Command name is WITH-USE-PACKAGE.
-2:WITH-USE-PACKAGE can accept only one package.
-  If you need to use some external packages, you need to nest command.
-3:You should pass parameter as keyword symbol.
+
+   1. Command name is WITH-USE-PACKAGE.
+   2. WITH-USE-PACKAGE can accept only one package.
+     If you need to use some external packages, you need to nest command.
+   3. You should pass parameter as keyword symbol.
+
 That's all.
 
 When you met a problem, see chapters below.
@@ -92,7 +94,7 @@ Rationale. Or for person who want to gaze into deep lisp darkness...
 
 Basic approach is below.
 
-```Common LispCommon Lisp
+```Common Lisp
 (let((*package*(find-package :alexandria)))
   (iota 3))
 ```
@@ -105,7 +107,7 @@ At first lisp do READ, and all symbols are interned in current package in this t
 Let's say current package is EXAMPLE, and EXAMPLE uses COMMON-LISP package.
 The code above is, in fact ...
 
-```Common LispCommon Lisp
+```Common Lisp
 (example::let((example::*package*(example::find-package keyword:alexandria)))
  (example::iota 3))
 ```
@@ -127,7 +129,7 @@ Else do nothing, traversing will go on.
 
 So code above becomes below
 
-```Common LispCommon Lisp
+```Common Lisp
 (example::let((example::*package*(example::find-package keyword:alexandria)))
  (alexandria::iota 3))
 ```
@@ -136,7 +138,7 @@ after macro expansion.
 
 This algorithm brings some restrictions.
 
-:Only one package can use.
+h3. Only one package can use.
 
 Maybe this is not the issue.
 You can nest it.
@@ -144,13 +146,13 @@ You can nest it.
 Unfortunately, small restriction is above only.
 Others are very buggy.
 
-:Too much strong shadowing.
+h3. Too much strong shadowing.
 
 Similar with FLET, WITH-PACKAGE has very strong shadowing.
 
 Let's say here is the code below
 
-```Common LispCommon Lisp
+```Common Lisp
 (flet((car(arg)
         "Which do you like cl:car or me?"
         (declare(ignore arg))
@@ -192,7 +194,7 @@ If you eval code below in sbcl...
 
 FLEXI-STREAMS'S STRING-TO-OCTETS shall be called three times.
 
-:Never cares helper.
+h3. Never cares helper.
 
 If you want to use WITH-PACKAGE inside DEFMACRO, you need to be more carefully.
 Because WITH-PACKAGE never cares helper command's return value.
@@ -222,7 +224,7 @@ To avoid this, you need to let command be inside of backquote.
     (foo 3)
     =>(0 1 2)
 
-:Name separation occurs against parameter.
+h3. Name separation occurs against parameter.
 
 Example code below signaled an error.
 

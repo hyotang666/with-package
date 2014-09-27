@@ -35,10 +35,12 @@ WITH-PACKAGEを使うことで外部パッケージを局所的に使うこと�
     *** - EVAL: undefined function IOTA
 
 知っておくべきことは以下の通り。
-１：コマンド名はWITH-USE-PACKAGEである。
-２：WITH-USE-PACKAGEで使えるのは１つのパッケージのみ。
-　　もし複数の外部パッケージを使いたいならコマンドをネストさせる必要がある。
-３：引数はキーワードシンボルで指定する。
+
+   1. コマンド名はWITH-USE-PACKAGEである。
+   2. WITH-USE-PACKAGEで使えるのは１つのパッケージのみ。
+   　　もし複数の外部パッケージを使いたいならコマンドをネストさせる必要がある。
+   3. 引数はキーワードシンボルで指定する。
+
 以上。
 
 何か問題にぶつかったら、その時は以下の章に目を通してみてほしい。
@@ -93,10 +95,8 @@ MOST-DANGEROUS-USE-PACKAGEはPACKAGEをUSEしようとし、もしカレント�
 
 基本的な攻略法は以下の通り。
 
-```Common Lisp
-(let((*package*(find-package :alexandria)))
-  (iota 3))
-```
+    (let((*package*(find-package :alexandria)))
+      (iota 3))
 
 非常にシンプルです。
 でも問題はそんなにシンプルじゃない。
@@ -106,10 +106,8 @@ MOST-DANGEROUS-USE-PACKAGEはPACKAGEをUSEしようとし、もしカレント�
 カレントパッケージがEXAMPLEだとして、EXAMPLEはCOMMON-LISPパッケージをUSEしているものとしよう。
 とすると上記のコードは実は以下のようなものであるといえる。
 
-```Common Lisp
-(example::let((example::*package*(example::find-package keyword:alexandria)))
- (example::iota 3))
-```
+    (example::let((example::*package*(example::find-package keyword:alexandria)))
+     (example::iota 3))
 
 EVAL時に、Lispはまず最初にカレントパッケージをalexandriaパッケージに動的に束縛する。
 そしてexample::iota関数を呼び出そうとする。
@@ -127,14 +125,12 @@ WITH-PACKAGEを使うと、Lispはカレントパッケージを、使うべき�
 
 ゆえに上記のコードはマクロ展開後以下のようになる。
 
-```Common Lisp
-(example::let((example::*package*(example::find-package keyword:alexandria)))
- (alexandria::iota 3))
-```
+    (example::let((example::*package*(example::find-package keyword:alexandria)))
+     (alexandria::iota 3))
 
 このアルゴリズムはいくつかの制約を引き換えとする。
 
-;　使えるパッケージは一つのみ。
+h3. 使えるパッケージは一つのみ。
 
 これはたぶん問題とならないと思う。
 ネストすればいいからです。
@@ -142,19 +138,17 @@ WITH-PACKAGEを使うと、Lispはカレントパッケージを、使うべき�
 残念ながら、小さな制約はこれのみです。
 他の制約は結構バグを生みやすい。
 
-;　強すぎるシャドウイング。
+h3. 強すぎるシャドウイング。
 
 FLETと似ていて、WITH-PACKAGEはとても強いシャドウイングを行う。
 
 以下のようなコードがあるとしよう。
 
-```Common Lisp
-(flet((car(arg)
-        "Which do you like cl:car or me?"
-        (declare(ignore arg))
-        (princ "You chose me! I love you!")))
-  (cl:car '(a b c)))
-```
+    (flet((car(arg)
+            "Which do you like cl:car or me?"
+            (declare(ignore arg))
+            (princ "You chose me! I love you!")))
+      (cl:car '(a b c)))
 
 CL:CARを明示的に呼び出しているのに、FLETはお構い無しです。
 
@@ -178,17 +172,15 @@ BABELやFLEXI-STREAMSといったライブラリにも同名の関数がある�
 
 もし以下のコードをSBCLで評価したなら、、、
 
-```Common Lisp
-(with-package:with-use-package(:babel)
-  (with-package:with-use-package(:flexi-streams)
-    (babel:string-to-octets "foo")
-    (sb-ext:string-to-octets "bar")
-    (string-to-octets "bazz")))
-```
+    (with-package:with-use-package(:babel)
+      (with-package:with-use-package(:flexi-streams)
+        (babel:string-to-octets "foo")
+        (sb-ext:string-to-octets "bar")
+        (string-to-octets "bazz")))
 
 FLEXI-STREAMSのSTRING-TO-OCTETSが３回呼び出されることとなる。
 
-;　ヘルパー関数には関与しない。
+h3. ヘルパー関数には関与しない。
 
 もしWITH-PACKAGEをDEFMACRO内で使いたいなら、さらに気をつけなくてはならない。
 というのもWITH-PACKAGEはヘルパーコマンドの返り値には関与しないからです。
@@ -218,35 +210,29 @@ WITH-PACKAGEが関与するのは引数として受け取ったBODYのみです�
     (foo 3)
     =>(0 1 2)
 
-; 引数に対し名前分割が起きる。
+h3. 引数に対し名前分割が起きる。
 
 以下のサンプルコードはエラーを発する。
 
-```Common Lisp
-(defun foo (png)
-  (with-package:with-use-package(:zpng)
-    (start-png png)
-    (write-png png)
-    (finish-png png)))
-```
+    (defun foo (png)
+      (with-package:with-use-package(:zpng)
+        (start-png png)
+        (write-png png)
+        (finish-png png)))
 
 というのもパッケージZPNGはクラス名としてシンボルPNGをエクスポートしているからです。
 ゆえに、上記のコードは以下のものと等価です
 
-```Common Lisp
-(example::defun example::foo (example::png)
-  (zpng:start-png zpng:png)
-  (zpng:write-png zpng:png)
-  (zpng:finish-png zpng:png))
-```
+    (example::defun example::foo (example::png)
+      (zpng:start-png zpng:png)
+      (zpng:write-png zpng:png)
+      (zpng:finish-png zpng:png))
 
 不幸にも、この定義は合法となる（もっとも処理系に依存するのだけれど。sbclならスタイルウォーニングを発するだろう）
 エラーは実行時に発せられる。
 
-```
-(foo 3)
-*** - FOO: variable ZPNG:PNG has no value
-```
+    (foo 3)
+    *** - FOO: variable ZPNG:PNG has no value
 
 もしシンボルZPNG:PNGが値を持っていたなら最悪だ。
 実行時でもエラーは発せられないかもしれず、それでいてfooの返り値は、引数の変わりにZPNG:PNGの値が使われるため期待とことなるものとなってしまう。
@@ -255,34 +241,28 @@ WITH-PACKAGEが関与するのは引数として受け取ったBODYのみです�
 
 １：コマンドをDEFUNの外側に出す。
 
-```Common Lisp
-(with-package:with-use-package(:zpng)
-  (defun foo (png)
-    (start-png png)
-    (write-png png)
-    (finish-png png)))
-```
+    (with-package:with-use-package(:zpng)
+      (defun foo (png)
+        (start-png png)
+        (write-png png)
+        (finish-png png)))
 
 上記のコードは以下コードに展開される。
 
-```Common Lisp
-(example::defun example::foo (zpng:png)
-  (zpng:start-png zpng:png)
-  (zpng:write-png zpng:png)
-  (zpng:finish-png zpng:png)))
-```
+    (example::defun example::foo (zpng:png)
+      (zpng:start-png zpng:png)
+      (zpng:write-png zpng:png)
+      (zpng:finish-png zpng:png)))
 
 名前分割は起きない。
 
 ２：:EXCEPTキーワード引数を使う。
 
-```Common Lisp
-(defun foo(png)
-  (with-package:with-use-package(:zpng :except (:png))
-    (start-png png)
-    (write-png png)
-    (finish-png png)))
-```
+    (defun foo(png)
+      (with-package:with-use-package(:zpng :except (:png))
+        (start-png png)
+        (write-png png)
+        (finish-png png)))
 
 ３：WITH-IMPORTを代わりに使う。
 
