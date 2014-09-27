@@ -94,10 +94,8 @@ Rationale. Or for person who want to gaze into deep lisp darkness...
 
 Basic approach is below.
 
-```Common Lisp
-(let((*package*(find-package :alexandria)))
-  (iota 3))
-```
+    (let((*package*(find-package :alexandria)))
+      (iota 3))
 
 Yes, very simple.
 But problem is not so simple.
@@ -107,10 +105,8 @@ At first lisp do READ, and all symbols are interned in current package in this t
 Let's say current package is EXAMPLE, and EXAMPLE uses COMMON-LISP package.
 The code above is, in fact ...
 
-```Common Lisp
-(example::let((example::*package*(example::find-package keyword:alexandria)))
- (example::iota 3))
-```
+    (example::let((example::*package*(example::find-package keyword:alexandria)))
+     (example::iota 3))
 
 after READ.
 In the EVAL time, at first, LET binds *package* to alexandria package dynamically.
@@ -129,16 +125,14 @@ Else do nothing, traversing will go on.
 
 So code above becomes below
 
-```Common Lisp
-(example::let((example::*package*(example::find-package keyword:alexandria)))
- (alexandria::iota 3))
-```
+    (example::let((example::*package*(example::find-package keyword:alexandria)))
+     (alexandria::iota 3))
 
 after macro expansion.
 
 This algorithm brings some restrictions.
 
-h3. Only one package can use.
+   * Only one package can use.
 
 Maybe this is not the issue.
 You can nest it.
@@ -146,26 +140,22 @@ You can nest it.
 Unfortunately, small restriction is above only.
 Others are very buggy.
 
-h3. Too much strong shadowing.
+   * Too much strong shadowing.
 
 Similar with FLET, WITH-PACKAGE has very strong shadowing.
 
 Let's say here is the code below
 
-```Common Lisp
-(flet((car(arg)
-        "Which do you like cl:car or me?"
-        (declare(ignore arg))
-        (princ "You chose me! I love you!")))
-  (cl:car '(a b c)))
-```
+    (flet((car(arg)
+            "Which do you like cl:car or me?"
+            (declare(ignore arg))
+            (princ "You chose me! I love you!")))
+      (cl:car '(a b c)))
 
 You chose cl:car explicitly, but flet:car never cares.
 
-```
-=> You chose me! I love you!
-"You chose me! I love you!"
-```
+    => You chose me! I love you!
+    "You chose me! I love you!"
 
 It may depends on implementation, but atleast GNU CLISP and CCL do this behavior.
 
@@ -184,17 +174,15 @@ Library BABEL and FLEXI-STREAMS has same name function too.
 
 If you eval code below in sbcl...
 
-```Common Lisp
-(with-package:with-use-package(:babel)
-  (with-package:with-use-package(:flexi-streams)
-    (babel:string-to-octets "foo")
-    (sb-ext:string-to-octets "bar")
-    (string-to-octets "bazz")))
-```
+    (with-package:with-use-package(:babel)
+      (with-package:with-use-package(:flexi-streams)
+        (babel:string-to-octets "foo")
+        (sb-ext:string-to-octets "bar")
+        (string-to-octets "bazz")))
 
 FLEXI-STREAMS'S STRING-TO-OCTETS shall be called three times.
 
-h3. Never cares helper.
+   * Never cares helper.
 
 If you want to use WITH-PACKAGE inside DEFMACRO, you need to be more carefully.
 Because WITH-PACKAGE never cares helper command's return value.
@@ -224,35 +212,29 @@ To avoid this, you need to let command be inside of backquote.
     (foo 3)
     =>(0 1 2)
 
-h3. Name separation occurs against parameter.
+   * Name separation occurs against parameter.
 
 Example code below signaled an error.
 
-```Common Lisp
-(defun foo (png)
-  (with-package:with-use-package(:zpng)
-    (start-png png)
-    (write-png png)
-    (finish-png png)))
-```
+    (defun foo (png)
+      (with-package:with-use-package(:zpng)
+        (start-png png)
+        (write-png png)
+        (finish-png png)))
 
 Because package ZPNG export symbol PNG as class name.
 So code above is equivalant with below.
 
-```Common Lisp
-(example::defun example::foo (example::png)
-  (zpng:start-png zpng:png)
-  (zpng:write-png zpng:png)
-  (zpng:finish-png zpng:png))
-```
+    (example::defun example::foo (example::png)
+      (zpng:start-png zpng:png)
+      (zpng:write-png zpng:png)
+      (zpng:finish-png zpng:png))
 
 Unfortunately, definition is valid (although it depends on implementation. SBCL will signal style warning.).
 Error is signaled in run time.
 
-```Common Lisp
-(foo 3)
-*** - FOO: variable ZPNG:PNG has no value
-```
+    (foo 3)
+    *** - FOO: variable ZPNG:PNG has no value
 
 If symbol ZPNG:PNG has its own value, it is worst situation.
 Even if it is run time, error may not signaled, but FOO's return value is not your expect because ZPNG:PNG value is used instead of parameter.
@@ -261,48 +243,40 @@ To avoid this, you have 3 ways.
 
 1:Let command be outside of DEFUN.
 
-```Common Lisp
-(with-package:with-use-package(:zpng)
-  (defun foo (png)
-    (start-png png)
-    (write-png png)
-    (finish-png png)))
-```
+    (with-package:with-use-package(:zpng)
+      (defun foo (png)
+        (start-png png)
+        (write-png png)
+        (finish-png png)))
 
 Above code becomes
 
-```Common Lisp
-(example::defun example::foo (zpng:png)
-  (zpng:start-png zpng:png)
-  (zpng:write-png zpng:png)
-  (zpng:finish-png zpng:png)))
-```
+    (example::defun example::foo (zpng:png)
+      (zpng:start-png zpng:png)
+      (zpng:write-png zpng:png)
+      (zpng:finish-png zpng:png)))
 
 after macro expansion.
 Name separation does not occur.
 
 2:Use :EXCEPT key word parameter.
 
-```Common Lisp
-(defun foo(png)
-  (with-package:with-use-package(:zpng :except (:png))
-    (start-png png)
-    (write-png png)
-    (finish-png png)))
-```
+    (defun foo(png)
+      (with-package:with-use-package(:zpng :except (:png))
+        (start-png png)
+        (write-png png)
+        (finish-png png)))
 
 3:Use WITH-IMPORT alternatively.
 
 If your interests symbol is few, WITH-IMPORT is better.
 In this example, ZPNG:PNG is not your interest symbol.
 
-```Common Lisp
-(defun foo(png)
-  (with-package:with-import(:zpng :start-png :write-png :finish-png))
-    (start-png png)
-    (write-png png)
-    (finish-png png)))
-```
+    (defun foo(png)
+      (with-package:with-import(:zpng :start-png :write-png :finish-png))
+        (start-png png)
+        (write-png png)
+        (finish-png png)))
 
 appendix
 --------------
