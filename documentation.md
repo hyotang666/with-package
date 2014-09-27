@@ -132,7 +132,7 @@ after macro expansion.
 
 This algorithm brings some restrictions.
 
-   * Only one package can use.
+   * **Only one package can use.**
 
 Maybe this is not the issue.
 You can nest it.
@@ -140,7 +140,7 @@ You can nest it.
 Unfortunately, small restriction is above only.
 Others are very buggy.
 
-   * Too much strong shadowing.
+   * **Too much strong shadowing.**
 
 Similar with FLET, WITH-PACKAGE has very strong shadowing.
 
@@ -182,7 +182,7 @@ If you eval code below in sbcl...
 
 FLEXI-STREAMS'S STRING-TO-OCTETS shall be called three times.
 
-   * Never cares helper.
+   * **Never cares helper.**
 
 If you want to use WITH-PACKAGE inside DEFMACRO, you need to be more carefully.
 Because WITH-PACKAGE never cares helper command's return value.
@@ -212,7 +212,7 @@ To avoid this, you need to let command be inside of backquote.
     (foo 3)
     =>(0 1 2)
 
-   * Name separation occurs against parameter.
+   * **Name separation occurs against parameter.**
 
 Example code below signaled an error.
 
@@ -278,7 +278,7 @@ In this example, ZPNG:PNG is not your interest symbol.
         (write-png png)
         (finish-png png)))
 
-appendix
+finally
 --------------
 
 Do you feel WITH-PACKAGE has too many restrictions?
