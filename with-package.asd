@@ -7,3 +7,6 @@
   :author "Shinichi Sato"
   :depends-on(:trestrul :named-readtables)
   :components ((:file "with-package")))
+;; Perform method below is added by JINGOH.GENERATOR.
+(defmethod perform ((o test-op) (c (eql (find-system "with-package"))))
+ (test-system :with-package.test))

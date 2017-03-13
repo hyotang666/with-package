@@ -5,10 +5,6 @@
     ;;;; main api
     #:with-import
     #:with-use-package
-    ;;;; miscellaneous
-    #:dangerous-use-package
-    #:most-dangerous-use-package
-    #:find-conflict
     ;;;; readtable-control
     #:|#@-reader|
     #:enable
@@ -71,26 +67,6 @@
 			       (set-exclusive-or black-list
 						 (uiop:ensure-list except)
 						 :test #'string=)))))
-
-(defun dangerous-use-package (package)
-  (loop :for symbol :being :each :external-symbol :in package
-	:if (find-symbol(string symbol)) :collect it :into ignored
-	:else :collect symbol :into imports
-	:finally (import imports)
-	(return ignored)))
-
-(defun most-dangerous-use-package (package)
-  (loop :for symbol :being :each :external-symbol :in package
-	:if (find-symbol(string symbol)) :collect it :into shadowed
-	:collect symbol :into symbols  
-	:finally (shadowing-import symbols)
-	(return shadowed)))
-
-(defun find-conflict(package)
-  (loop :for symbol :being :each :external-symbol :in package
-	:if (find-symbol(string symbol))
-	:collect(let((sym(intern(string symbol))))
-		  (cons sym (symbol-package sym)))))
 
 (defun |#@-reader|(stream character number)
   (declare(ignore character number))
