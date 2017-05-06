@@ -47,6 +47,7 @@
 #?(with-import("alexandria" :iota)
     (iota 5))
 :signals package-missing
+,:lazy T
 #?(with-import((find-package :alexandria) :iota)
     (iota 5))
 :signals error
@@ -111,6 +112,7 @@
 #?(with-import(:no-such-package :hoge)
     (hoge))
 :signals package-missing
+,:lazy T
 
 (requirements-about WITH-USE-PACKAGE)
 
@@ -172,6 +174,7 @@
 #?(with-use-package(:no-such-package)
     :hoge)
 :signals package-missing
+,:lazy T
 
 (requirements-about |#@-reader|)
 
