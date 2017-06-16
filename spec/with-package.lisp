@@ -68,11 +68,16 @@
 ,:test equal
 #?(with-import(:alexandria "iota")
     (iota 5))
-:signals error
+:signals (or error
+	     warning ; for ccl
+	     )
+
 ; not evaluated.
 #?(with-import(:alexandria (concatenate 'string "IO" "TA"))
     (iota 5))
-:signals error
+:signals (or error
+	     warning ; for ccl
+	     )
 
 ; body := implicit progn.
 
@@ -126,7 +131,9 @@
 ; can access only external symbols.
 #?(with-use-package(:alexandria)
     (extract-function-name '#'car))
-:signals error
+:signals (or error
+	     warning ; for ccl
+	     )
 
 #+syntax
 (WITH-USE-PACKAGE (package &key except with-internal) &body body) ; => result
@@ -140,7 +147,9 @@
 ; not evaluated.
 #?(with-use-package(:alexandria :except iota)
     (iota 5))
-:signals error
+:signals (or error
+	     warning ; for ccl
+	     )
 
 ; with-internal := symbol name or list which includes symbol names.
 ; When specified, such symbols are accessable.
