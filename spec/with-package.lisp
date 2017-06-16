@@ -1,7 +1,7 @@
 (defpackage :with-package.spec (:use :cl :jingoh :with-package)
   (:shadowing-import-from :with-package #:enable #:syntax))
 (in-package :with-package.spec)
-(setup :with-package.spec)
+(setup :with-package)
 
 (requirements-about WITH-IMPORT)
 
