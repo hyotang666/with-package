@@ -29,7 +29,7 @@ WITH-PACKAGE allows you to do it.
 ## From developer
 
 * Product's goal - already?
-* License - LGPL
+* License - MIT
 * Developped with - CLISP
 * Tested with - SBCL, CCL, ECL
 
