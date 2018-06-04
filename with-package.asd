@@ -6,7 +6,11 @@
                         (uiop:subpathname *load-pathname* "README.md"))
   :author "Shinichi Sato"
   :license "MIT"
-  :depends-on(:trestrul :named-readtables)
+  :depends-on
+  (
+   "trestrul"           ; utilities for tree structured list.
+   "named-readtables"   ; manage readtables.
+   )
   :components ((:file "with-package")))
 
 (defmethod component-depends-on ((o test-op) (c (eql (find-system "with-package"))))
