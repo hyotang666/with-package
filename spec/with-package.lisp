@@ -13,11 +13,12 @@
        (iota 5)) ; can call alexandria:iota.
     (ignore-errors (iota 5))) ; alexandria:iota is not imported.
 :multiple-value-satisfies
-#`(& (null $1)
+(lambda($1 $2 $3 $4 $5)
+  (& (null $1)
      (typep $2 'condition)
      (equal $3 '(0 1 2 3 4))
      (null $4)
-     (typep $5 'condition))
+     (typep $5 'condition)))
 
 ; Internal symbols also can be imported temporarily.
 #?(nth-value 1 (find-symbol "EXTRACT-FUNCTION-NAME" :alexandria))
@@ -226,8 +227,9 @@
     (enable)
     (values exist? (get-dispatch-macro-character #\# #\@)))
 :multiple-value-satisfies
-#`(& (null $1)
-     (not(null $2)))
+(lambda($1 $2)
+  (& (null $1)
+     (not(null $2))))
 
 #+syntax
 (ENABLE) ; => result

@@ -1,7 +1,7 @@
 ;; vim: ft=lisp et
 (in-package :asdf)
 (defsystem :with-package
-  :version "0.0.1"
+  :version "0.0.2"
   :description "Tiny library for using external package locally."
   :long-description #.(uiop:read-file-string
                         (uiop:subpathname *load-pathname* "README.md"))
