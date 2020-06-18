@@ -31,6 +31,8 @@ WITH-PACKAGE allows you to do it.
 * Product's goal - already?
 * License - MIT
 ### Tested with
-SBCL/1.5.6
-CCL/1.11.5
+* SBCL/2.0.5
+* CCL/1.12
+* ECL/20.4.24
+* CLISP/2.49
 
