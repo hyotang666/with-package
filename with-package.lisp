@@ -15,6 +15,8 @@
 
 (in-package :with-package)
 
+(declaim (optimize speed))
+
 (define-condition package-missing (error)
   ((api :initarg :api :reader api)
    (name :initarg :name :reader name))
@@ -43,7 +45,7 @@
                         (sb-int:comma-kind leaf))))
                    ((not (target-symbolp leaf)) leaf)
                    ((member leaf symbols :test #'string=)
-                    (intern (string leaf)))
+                    (intern (symbol-name leaf)))
                    (t leaf))))
     (mapleaf #'treat body)))
 
@@ -79,6 +81,8 @@
   `(eval-when (:compile-toplevel :load-toplevel :execute)
      (set-dispatch-macro-character #\# #\@ #'|#@-reader|)))
 
-(defreadtable syntax
-  (:merge :standard)
-  (:dispatch-macro-char #\# #\@ #'|#@-reader|))
+(locally ; Out of responds
+ (declare (optimize (speed 1)))
+ (defreadtable syntax
+   (:merge :standard)
+   (:dispatch-macro-char #\# #\@ #'|#@-reader|)))
