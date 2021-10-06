@@ -2,14 +2,10 @@
 
 ## Tiny library for using external package locally.
 
-### Current lisp world
-CL has strong package system.
+## Alternatives.
 
-### Issues
-Although there is no way to use package temporarily.
-
-### Propose
-WITH-PACKAGE allows you to do it.
+* [advanced-readtabl](https://github.com/Kalimehtar/advanced-readtable)
+* [trivial-package-local-nicknames](https://github.com/phoe/trivial-package-local-nicknames)
 
 ## Usage
 ```lisp
