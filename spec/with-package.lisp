@@ -223,9 +223,9 @@
 
 ;;;; Description:
 ; Set dispatch macro `#@` to `*readtable*`
-#?(let((exist? (get-dispatch-macro-character #\# #\@)))
+#?(let((exist? (named-readtables::%get-dispatch-macro-character #\# #\@ *readtable*)))
     (enable)
-    (values exist? (get-dispatch-macro-character #\# #\@)))
+    (values exist? (named-readtables::%get-dispatch-macro-character #\# #\@ *readtable*)))
 :multiple-value-satisfies
 (lambda($1 $2)
   (& (null $1)
