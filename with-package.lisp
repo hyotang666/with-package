@@ -32,14 +32,14 @@
   (and (typep arg '(and symbol (not (or keyword boolean))))
        (symbol-package arg)))
 
-(defun treatment (symbols body)
+(defun replace-symbols (symbols body)
   (labels ((treat (leaf)
              (cond #+sbcl
                    ((sb-int:comma-p leaf)
                     (let ((expr (sb-int:comma-expr leaf)))
                       (sb-int:unquote
                         (if (consp expr)
-                            (treatment symbols expr)
+                            (replace-symbols symbols expr)
                             (treat expr))
                         (sb-int:comma-kind leaf))))
                    ((not (target-symbolp leaf)) leaf)
@@ -68,7 +68,7 @@
   So use WITH-IMPORT in outermost scope is strongly recommended."
   (let ((*package*
          (or (find-package package) (package-missing 'with-import package))))
-    `(progn ,@(treatment symbols body))))
+    `(progn ,@(replace-symbols symbols body))))
 
 (defun symbols-but-except (package except with-internal)
   (loop :for symbol :being :each :external-symbol :in package
@@ -102,7 +102,8 @@
          (or (find-package package)
              (package-missing 'with-use-package package))))
     `(progn
-      ,@(treatment (symbols-but-except package except with-internal) body))))
+      ,@(replace-symbols (symbols-but-except package except with-internal)
+                         body))))
 
 (defun |#@-reader| (stream character number)
   (declare (ignore character number))
