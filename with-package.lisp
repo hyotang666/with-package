@@ -81,8 +81,9 @@
   `(eval-when (:compile-toplevel :load-toplevel :execute)
      (set-dispatch-macro-character #\# #\@ #'|#@-reader|)))
 
-(locally ; Out of responds
- (declare (optimize (speed 1)))
+(locally ; Out of our responsibility.
+ #+sbcl
+ (declare (sb-ext:muffle-conditions sb-ext:compiler-note))
  (defreadtable syntax
    (:merge :standard)
    (:dispatch-macro-char #\# #\@ #'|#@-reader|)))
