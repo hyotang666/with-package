@@ -3,14 +3,14 @@
 (defsystem :with-package
   :version "0.0.4"
   :description "Tiny library for using external package locally."
-  :long-description #.(uiop:read-file-string
-                        (uiop:subpathname *load-pathname* "README.md"))
-  :author "Shinichi Sato"
+  :author "SATO Shinichi"
+  :source-control (:git "git@github.com:hyotang666/with-package")
+  :bug-tracker "https://github.com/hyotang666/with-package/issues"
   :license "MIT"
   :depends-on
   (
-   "trestrul"           ; utilities for tree structured list.
-   "named-readtables"   ; manage readtables.
+   "trestrul"           ; Utilities for tree structured list.
+   "named-readtables"   ; Manage readtables.
    )
   :components ((:file "with-package")))
 
