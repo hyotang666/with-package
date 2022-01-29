@@ -9,11 +9,11 @@
 ; Import some symbols temporarily.
 #?(multiple-value-call #'values
     (ignore-errors (iota 5)) ; iota function is not defined.
-     (with-import(:alexandria #:iota)
-       (iota 5)) ; can call alexandria:iota.
+    (with-import (:alexandria #:iota)
+      (iota 5)) ; can call alexandria:iota.
     (ignore-errors (iota 5))) ; alexandria:iota is not imported.
 :multiple-value-satisfies
-(lambda($1 $2 $3 $4 $5)
+(lambda ($1 $2 $3 $4 $5)
   (& (null $1)
      (typep $2 'condition)
      (equal $3 '(0 1 2 3 4))
@@ -23,7 +23,7 @@
 ; Internal symbols also can be imported temporarily.
 #?(nth-value 1 (find-symbol "EXTRACT-FUNCTION-NAME" :alexandria))
 => :INTERNAL
-#?(with-import(:alexandria #:extract-function-name)
+#?(with-import (:alexandria #:extract-function-name)
     (extract-function-name '#'car))
 => CAR
 
@@ -33,48 +33,48 @@
 ;;;; Arguments and Values:
 
 ; package := package-name (i.e. symbol or string), not evaluated.
-#?(with-import(alexandria :iota)
+#?(with-import (alexandria :iota)
     (iota 5))
 => (0 1 2 3 4)
 ,:test equal
-#?(with-import(#:alexandria :iota)
+#?(with-import (#:alexandria :iota)
     (iota 5))
 => (0 1 2 3 4)
 ,:test equal
-#?(with-import("ALEXANDRIA" :iota)
+#?(with-import ("ALEXANDRIA" :iota)
     (iota 5))
 => (0 1 2 3 4)
 ,:test equal
-#?(with-import("alexandria" :iota)
+#?(with-import ("alexandria" :iota)
     (iota 5))
 :signals package-missing
 ,:lazy T
-#?(with-import((find-package :alexandria) :iota)
+#?(with-import ((find-package :alexandria) :iota)
     (iota 5))
 :signals error
 
 ; symbol := symbol which is imported temporarily.
 ; Only symbol name is used. (i.e. keyword, uninterned symbol, and string are valid.)
-#?(with-import(:alexandria :iota)
+#?(with-import (:alexandria :iota)
     (iota 5))
 => (0 1 2 3 4)
 ,:test equal
-#?(with-import(:alexandria iota)
+#?(with-import (:alexandria iota)
     (iota 5))
 => (0 1 2 3 4)
 ,:test equal
-#?(with-import(:alexandria "IOTA")
+#?(with-import (:alexandria "IOTA")
     (iota 5))
 => (0 1 2 3 4)
 ,:test equal
-#?(with-import(:alexandria "iota")
+#?(with-import (:alexandria "iota")
     (iota 5))
 :signals (or error
 	     warning ; for ccl
 	     )
 
 ; not evaluated.
-#?(with-import(:alexandria (concatenate 'string "IO" "TA"))
+#?(with-import (:alexandria (concatenate 'string "IO" "TA"))
     (iota 5))
 :signals (or error
 	     warning ; for ccl
@@ -92,30 +92,30 @@
 
 ;;;; Notes:
 ; When symbol conflicts, strong shadowing is occur.
-#?(defun iota (arg)(princ arg))
+#?(defun iota (arg) (princ arg))
 => IOTA
 #?(iota 5) :outputs "5"
-#?(with-import(:alexandria #:iota)
+#?(with-import (:alexandria #:iota)
     (iota 5))
 => (0 1 2 3 4)
 ,:test equal
 
 ; Even if package prefix is specified, it is shadowed.
-#?(with-import(:alexandria #:iota)
+#?(with-import (:alexandria #:iota)
     (with-package.spec::iota 5))
 => (0 1 2 3 4)
 ,:test equal
 
 ; When with-import is nested, most inner one is picked.
-#?(with-import(:alexandria #:iota)
-    (with-import(:with-package.spec #:iota)
+#?(with-import (:alexandria #:iota)
+    (with-import (:with-package.spec #:iota)
       (iota 5)))
 :outputs "5"
 ,:after (fmakunbound 'iota)
 
 ;;;; Exceptional-Situations:
 ; When package does not exist, an error is signaled.
-#?(with-import(:no-such-package :hoge)
+#?(with-import (:no-such-package :hoge)
     (hoge))
 :signals package-missing
 ,:lazy T
@@ -124,13 +124,13 @@
 
 ;;;; Description:
 ; Use package temporarily.
-#?(with-use-package(:alexandria)
+#?(with-use-package (:alexandria)
     (iota 5))
 => (0 1 2 3 4)
 ,:test equal
 
 ; can access only external symbols.
-#?(with-use-package(:alexandria)
+#?(with-use-package (:alexandria)
     (extract-function-name '#'car))
 :signals (or error
 	     warning ; for ccl
@@ -146,7 +146,7 @@
 ; except := symbol name or list which includes symbol names.
 ; When specified, such symbols are not accessable.
 ; not evaluated.
-#?(with-use-package(:alexandria :except iota)
+#?(with-use-package (:alexandria :except iota)
     (iota 5))
 :signals (or error
 	     warning ; for ccl
@@ -155,7 +155,7 @@
 ; with-internal := symbol name or list which includes symbol names.
 ; When specified, such symbols are accessable.
 ; Not evaluated.
-#?(with-use-package(:alexandria :with-internal #:extract-function-name)
+#?(with-use-package (:alexandria :with-internal #:extract-function-name)
     (extract-function-name '#'car))
 => CAR
 
@@ -171,9 +171,9 @@
 
 ;;;; Notes:
 ; When symbol conflicts, strong shadowing is occur.
-#?(defun iota (arg)(princ arg))
+#?(defun iota (arg) (princ arg))
 => IOTA
-#?(with-use-package(:alexandria)
+#?(with-use-package (:alexandria)
     (with-package.spec::iota 5))
 => (0 1 2 3 4)
 ,:test equal
@@ -181,7 +181,7 @@
 
 ;;;; Exceptional-Situations:
 ; When package is not found, an error is signaled.
-#?(with-use-package(:no-such-package)
+#?(with-use-package (:no-such-package)
     :hoge)
 :signals package-missing
 ,:lazy T
@@ -218,7 +218,7 @@
 ;;;; Exceptional-Situations:
 
 (requirements-about ENABLE
-		    :around (let((*readtable*(copy-readtable nil)))
+		    :around (let ((*readtable* (copy-readtable nil)))
 			      (call-body)))
 
 ;;;; Description:
@@ -227,7 +227,7 @@
     (enable)
     (values exist? (named-readtables::%get-dispatch-macro-character #\# #\@ *readtable*)))
 :multiple-value-satisfies
-(lambda($1 $2)
+(lambda ($1 $2)
   (& (null $1)
      (not(null $2))))
 
