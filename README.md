@@ -24,11 +24,18 @@
 
 ## From developer
 
-* Product's goal - already?
-* License - MIT
-### Tested with
-* SBCL/2.0.5
-* CCL/1.12
-* ECL/20.4.24
-* CLISP/2.49
+### Product's goal.
+Already?
 
+### License
+MIT
+
+## Tested with
+
+* SBCL/2.0.5
+* CCL/1.12.1
+* ECL/21.2.1
+* CLISP/2.49
+* allegro/10.1
+* CMUCL/21D
+* abcl/1.8.0
