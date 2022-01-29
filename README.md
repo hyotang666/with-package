@@ -4,7 +4,7 @@
 
 ## Alternatives.
 
-* [advanced-readtabl](https://github.com/Kalimehtar/advanced-readtable)
+* [advanced-readtable](https://github.com/Kalimehtar/advanced-readtable)
 * [trivial-package-local-nicknames](https://github.com/phoe/trivial-package-local-nicknames)
 
 ## Usage
