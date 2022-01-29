@@ -28,6 +28,26 @@
 (defun package-missing (api package-name)
   (error (make-condition 'package-missing :api api :name package-name)))
 
+(defun target-symbolp (arg)
+  (and (typep arg '(and symbol (not (or keyword boolean))))
+       (symbol-package arg)))
+
+(defun treatment (symbols body)
+  (labels ((treat (leaf)
+             (cond #+sbcl
+                   ((sb-int:comma-p leaf)
+                    (let ((expr (sb-int:comma-expr leaf)))
+                      (sb-int:unquote
+                        (if (consp expr)
+                            (treatment symbols expr)
+                            (treat expr))
+                        (sb-int:comma-kind leaf))))
+                   ((not (target-symbolp leaf)) leaf)
+                   ((member leaf symbols :test #'string=)
+                    (intern (symbol-name leaf)))
+                   (t leaf))))
+    (mapleaf #'treat body)))
+
 (defmacro with-import ((package &rest symbols) &body body)
   "(with-import (<package> symbol+) { body }*)
 
@@ -50,25 +70,13 @@
          (or (find-package package) (package-missing 'with-import package))))
     `(progn ,@(treatment symbols body))))
 
-(defun treatment (symbols body)
-  (labels ((treat (leaf)
-             (cond #+sbcl
-                   ((sb-int:comma-p leaf)
-                    (let ((expr (sb-int:comma-expr leaf)))
-                      (sb-int:unquote
-                        (if (consp expr)
-                            (treatment symbols expr)
-                            (treat expr))
-                        (sb-int:comma-kind leaf))))
-                   ((not (target-symbolp leaf)) leaf)
-                   ((member leaf symbols :test #'string=)
-                    (intern (symbol-name leaf)))
-                   (t leaf))))
-    (mapleaf #'treat body)))
-
-(defun target-symbolp (arg)
-  (and (typep arg '(and symbol (not (or keyword boolean))))
-       (symbol-package arg)))
+(defun symbols-but-except (package except with-internal)
+  (loop :for symbol :being :each :external-symbol :in package
+        :collect symbol :into black-list
+        :finally (return
+                  (nconc (uiop:ensure-list with-internal)
+                         (set-exclusive-or black-list (uiop:ensure-list except)
+                                           :test #'string=)))))
 
 (defmacro with-use-package ((package &key except with-internal) &body body)
   "(with-use-package (<package> { :except symbol* } { :with-internal symbol* }) { body }*)
@@ -95,14 +103,6 @@
              (package-missing 'with-use-package package))))
     `(progn
       ,@(treatment (symbols-but-except package except with-internal) body))))
-
-(defun symbols-but-except (package except with-internal)
-  (loop :for symbol :being :each :external-symbol :in package
-        :collect symbol :into black-list
-        :finally (return
-                  (nconc (uiop:ensure-list with-internal)
-                         (set-exclusive-or black-list (uiop:ensure-list except)
-                                           :test #'string=)))))
 
 (defun |#@-reader| (stream character number)
   (declare (ignore character number))
