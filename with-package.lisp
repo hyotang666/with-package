@@ -29,6 +29,23 @@
   (error (make-condition 'package-missing :api api :name package-name)))
 
 (defmacro with-import ((package &rest symbols) &body body)
+  "(with-import (<package> symbol+) { body }*)
+
+  <package> := package designator. Not be evaluated.
+
+  In the WITH-IMPORT body, the specified SYMBOLs are treated as if it is
+  imported from the <PACKAGE>.
+
+  NOTE!: In fact, WITH-IMPORT does not import the symbols actually.
+  Emulating it by replacing the symbols instead.
+  So you can not access the symbols that have the same name even if explicitly
+  specify another package prefix.
+
+  NOTE!: If the SYMBOLs is also used as a variable and such variable is bound at
+  the outer scope of the WITH-IMPORT you can not access such a variable because
+  the outer variable is current-package::var but the inner variable becomes
+  <package>::var.
+  So use WITH-IMPORT in outermost scope is strongly recommended."
   (let ((*package*
          (or (find-package package) (package-missing 'with-import package))))
     `(progn ,@(treatment symbols body))))
@@ -54,6 +71,25 @@
        (symbol-package arg)))
 
 (defmacro with-use-package ((package &key except with-internal) &body body)
+  "(with-use-package (<package> { :except symbol* } { :with-internal symbol* }) { body }*)
+
+  <package> := package designator. Not be evaluated.
+
+  In the WITH-USE-PACKAGE body, all symbols that are exported from the <PACKAGE>
+  can be accessed as is the <PACKAGE> is used.
+  If :EXCEPT is specified such symbols are not able to be accessed.
+  If :WITH-INTERNAL is specified such symbols can be accessed.
+
+  NOTE!: In fact, WITH-USE-PACKAGE does not use the <PACKAGE> actually.
+  Emulating it by replacing the symbols instead.
+  So you can not access the symbols that have the same name even if explicitly
+  specify another package prefix.
+
+  NOTE!: If the symbols that are exported from the <PACKAGE> is also used as
+  a variable and such variable is bound at the outer scope of the
+  WITH-USE-PACKAGE you can not access such a variable because the outer variable
+  is current-package::var but the inner variable becomes <package>::var.
+  So use WITH-USE-PACKAGE in outermost scope is strongly recommended."
   (let ((*package*
          (or (find-package package)
              (package-missing 'with-use-package package))))
