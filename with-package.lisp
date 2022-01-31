@@ -75,9 +75,12 @@
                                               (uiop:ensure-list except))))))
 
 (defmacro with-use-package ((package &key except with-internal) &body body)
-  "(with-use-package (<package> { :except symbol* } { :with-internal symbol* }) { body }*)
+  "(with-use-package (<package> { <except> } { <with-internal> }) { body }*)
 
   <package> := package designator. Not be evaluated.
+
+  <except> := :except [ symbol | (symbol*) ]
+  <with-internal> := :with-internal [ symbol | (symbol*) ]
 
   In the WITH-USE-PACKAGE body, all symbols that are exported from the <PACKAGE>
   can be accessed as is the <PACKAGE> is used.
