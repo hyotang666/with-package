@@ -32,7 +32,7 @@ MIT
 
 ## Tested with
 
-* SBCL/2.2.0
+* SBCL/2.2.1
 * CCL/1.12.1
 * ECL/21.2.1
 * CLISP/2.49
