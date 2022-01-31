@@ -4,8 +4,8 @@
 
 ## Alternatives.
 
-* [advanced-readtable](https://github.com/Kalimehtar/advanced-readtable)
-* [trivial-package-local-nicknames](https://github.com/phoe/trivial-package-local-nicknames)
+* [advanced-readtable]
+* [trivial-package-local-nicknames]
 
 ## Usage
 ```lisp
@@ -39,3 +39,9 @@ MIT
 * allegro/10.1
 * CMUCL/21D
 * abcl/1.8.0
+
+<!-- Links -->
+
+[advanced-readtable]:https://github.com/Kalimehtar/advanced-readtable
+[trivial-package-local-nicknames]:https://github.com/phoe/trivial-package-local-nicknames
+
