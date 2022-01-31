@@ -63,18 +63,16 @@
         body)))
 
 (defun symbols-but-except (package except with-internal)
-  (loop :for symbol :being :each :external-symbol :in package
-        :collect symbol :into externals
-        :finally (return
-                  (nconc
-                    (mapcar
-                      (lambda (symbol) (uiop:find-symbol* symbol package))
-                      (uiop:ensure-list with-internal))
-                    (set-exclusive-or externals
-                                      (mapcar
-                                        (lambda (symbol)
-                                          (uiop:find-symbol* symbol package))
-                                        (uiop:ensure-list except)))))))
+  (labels ((external-symbols (package)
+             (loop :for symbol :being :each :external-symbol :in package
+                   :collect symbol))
+           (find-symbols-in (package symbols)
+             (mapcar (lambda (symbol) (uiop:find-symbol* symbol package))
+                     symbols)))
+    (nconc (find-symbols-in package (uiop:ensure-list with-internal))
+           (set-exclusive-or (external-symbols package)
+                             (find-symbols-in package
+                                              (uiop:ensure-list except))))))
 
 (defmacro with-use-package ((package &key except with-internal) &body body)
   "(with-use-package (<package> { :except symbol* } { :with-internal symbol* }) { body }*)
