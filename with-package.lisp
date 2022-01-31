@@ -50,8 +50,7 @@
 
   NOTE!: In fact, WITH-IMPORT does not import the symbols actually.
   Emulating it by replacing the symbols instead.
-  So you can not access the symbols that have the same name even if explicitly
-  specify another package prefix.
+  Every symbol that has the same name as specified SYMBOLs are replaced.
 
   NOTE!: If the SYMBOLs is also used as a variable and such variable is bound at
   the outer scope of the WITH-IMPORT you can not access such a variable because
@@ -89,13 +88,12 @@
 
   NOTE!: In fact, WITH-USE-PACKAGE does not use the <PACKAGE> actually.
   Emulating it by replacing the symbols instead.
-  So you can not access the symbols that have the same name even if explicitly
-  specify another package prefix.
+  Every symbol that has the same name as specified SYMBOLs are replaced.
 
-  NOTE!: If the symbols that are exported from the <PACKAGE> is also used as
-  a variable and such variable is bound at the outer scope of the
-  WITH-USE-PACKAGE you can not access such a variable because the outer variable
-  is current-package::var but the inner variable becomes <package>::var.
+  NOTE!: If the specified symbols is also used as a variable and such variable
+  is bound at the outer scope of the WITH-USE-PACKAGE you can not access such a
+  variable because the outer variable is current-package::var but the inner
+  variable becomes <package>::var.
   So use WITH-USE-PACKAGE in outermost scope is strongly recommended."
   `(progn
     ,@(replace-symbols (symbols-but-except package except with-internal) body)))
