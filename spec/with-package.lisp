@@ -47,7 +47,7 @@
 ,:test equal
 #?(with-import ("alexandria" :iota)
     (iota 5))
-:signals package-missing
+:signals error
 ,:lazy T
 #?(with-import ((find-package :alexandria) :iota)
     (iota 5))
@@ -117,7 +117,7 @@
 ; When package does not exist, an error is signaled.
 #?(with-import (:no-such-package :hoge)
     (hoge))
-:signals package-missing
+:signals error
 ,:lazy T
 
 (requirements-about WITH-USE-PACKAGE)
@@ -183,7 +183,7 @@
 ; When package is not found, an error is signaled.
 #?(with-use-package (:no-such-package)
     :hoge)
-:signals package-missing
+:signals error
 ,:lazy T
 
 (requirements-about |#@-reader|)
@@ -247,48 +247,3 @@
 ;;;; Notes:
 
 ;;;; Exceptional-Situations:
-
-(requirements-about PACKAGE-MISSING)
-
-;;;; Description:
-; When specified package is not found, this condition is signaled.
-
-;;;; Class Precedence List: (case in CLISP)
-; package-missing error serious-condition condition standard-object t
-
-;;;; Effective Slots:
-
-; API [Type] T
-; [READER] api
-
-; NAME [Type] T
-; [READER] name
-
-;;;; Notes:
-
-(requirements-about PACKAGE-MISSING)
-
-;;;; Description:
-; Short hand for error.
-
-#+syntax
-(PACKAGE-MISSING api package-name) ; => result
-
-;;;; Arguments and Values:
-
-; api := symbol represents which api signals.
-
-; package-name := expected pacakge name.
-
-; result := error
-
-;;;; Affected By:
-; Dynamic condition handlers.
-
-;;;; Side-Effects:
-; Signals an error.
-
-;;;; Notes:
-
-;;;; Exceptional-Situations:
-

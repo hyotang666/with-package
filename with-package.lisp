@@ -10,27 +10,17 @@
            #:|#@-reader|
            #:enable
            #:syntax ; readtable name.
-           ;;;; condition
-           #:package-missing))
+           ))
 
 (in-package :with-package)
 
 (declaim (optimize speed))
 
-(define-condition package-missing (error)
-  ((api :initarg :api :reader api)
-   (name :initarg :name :reader name))
-  (:report
-   (lambda (condition *standard-output*)
-     (format t "~A: Package ~S is not found.~%" (api condition)
-             (name condition)))))
-
-(defun package-missing (api package-name)
-  (error (make-condition 'package-missing :api api :name package-name)))
-
 (defun target-symbolp (arg)
   (and (typep arg '(and symbol (not (or keyword boolean))))
        (symbol-package arg)))
+
+(declaim (ftype (function (list list) (values list &optional)) replace-symbols))
 
 (defun replace-symbols (symbols body)
   (labels ((treat (leaf)
@@ -43,8 +33,10 @@
                             (treat expr))
                         (sb-int:comma-kind leaf))))
                    ((not (target-symbolp leaf)) leaf)
-                   ((member leaf symbols :test #'string=)
-                    (intern (symbol-name leaf)))
+                   ((locally
+                     #+sbcl
+                     (declare (sb-ext:muffle-conditions sb-ext:compiler-note))
+                     (find leaf symbols :test #'string=)))
                    (t leaf))))
     (mapleaf #'treat body)))
 
@@ -66,17 +58,24 @@
   the outer variable is current-package::var but the inner variable becomes
   <package>::var.
   So use WITH-IMPORT in outermost scope is strongly recommended."
-  (let ((*package*
-         (or (find-package package) (package-missing 'with-import package))))
-    `(progn ,@(replace-symbols symbols body))))
+  `(progn
+    ,@(replace-symbols
+        (mapcar (lambda (symbol) (uiop:find-symbol* symbol package)) symbols)
+        body)))
 
 (defun symbols-but-except (package except with-internal)
   (loop :for symbol :being :each :external-symbol :in package
-        :collect symbol :into black-list
+        :collect symbol :into externals
         :finally (return
-                  (nconc (uiop:ensure-list with-internal)
-                         (set-exclusive-or black-list (uiop:ensure-list except)
-                                           :test #'string=)))))
+                  (nconc
+                    (mapcar
+                      (lambda (symbol) (uiop:find-symbol* symbol package))
+                      (uiop:ensure-list with-internal))
+                    (set-exclusive-or externals
+                                      (mapcar
+                                        (lambda (symbol)
+                                          (uiop:find-symbol* symbol package))
+                                        (uiop:ensure-list except)))))))
 
 (defmacro with-use-package ((package &key except with-internal) &body body)
   "(with-use-package (<package> { :except symbol* } { :with-internal symbol* }) { body }*)
@@ -98,12 +97,8 @@
   WITH-USE-PACKAGE you can not access such a variable because the outer variable
   is current-package::var but the inner variable becomes <package>::var.
   So use WITH-USE-PACKAGE in outermost scope is strongly recommended."
-  (let ((*package*
-         (or (find-package package)
-             (package-missing 'with-use-package package))))
-    `(progn
-      ,@(replace-symbols (symbols-but-except package except with-internal)
-                         body))))
+  `(progn
+    ,@(replace-symbols (symbols-but-except package except with-internal) body)))
 
 (defun |#@-reader| (stream character number)
   (declare (ignore character number))

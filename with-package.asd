@@ -1,7 +1,7 @@
 ;; vim: ft=lisp et
 (in-package :asdf)
 (defsystem :with-package
-  :version "0.0.8"
+  :version "1.0.0"
   :description "Tiny library for using external package locally."
   :author "SATO Shinichi"
   :source-control (:git "git@github.com:hyotang666/with-package")
@@ -10,6 +10,7 @@
   :depends-on
   (
    "trestrul"           ; Utilities for tree structured list.
+   "uiop"               ; Utilities implicitly depend on via asdf.
    "named-readtables"   ; Manage readtables.
    )
   :components ((:file "with-package")))
